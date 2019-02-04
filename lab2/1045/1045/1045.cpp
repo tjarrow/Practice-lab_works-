@@ -27,7 +27,7 @@ bool dfs(int now_ver) {
 	}
 
 	int count_ver = 0;				
-	for (int i = 0; i<airports[now_ver].size(); i++) {			
+	for (int i = 0; i < airports[now_ver].size(); i++) {			
 		if (!is_use[airports[now_ver][i]]) {
 			child = dfs(airports[now_ver][i]);
 			if (level % 2 == 1 ? child == FIRST_WIN : child == SECOND_WIN) {
@@ -51,7 +51,8 @@ bool dfs(int now_ver) {
 
 	is_use[now_ver] = false;
 
-	if (level != 1)return ((level--) % 2 == 1 ? SECOND_WIN : FIRST_WIN);
+	if (level != 1) 
+		return ((level--) % 2 == 1 ? SECOND_WIN : FIRST_WIN);
 	else {
 		if (child == FIRST_WIN) {
 			cout << "First player wins flying to airport " << second_ver << endl;
@@ -66,7 +67,7 @@ int main() {
 	int n, k;
 	cin >> n >> k;
 	int u, v;
-	for (int i = 0; i<n - 1; i++) {
+	for (int i = 0; i < n - 1; i++) {
 		cin >> u >> v;
 		airports[u].push_back(v);
 		airports[v].push_back(u);
