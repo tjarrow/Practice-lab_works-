@@ -3,6 +3,8 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <iterator>
+#include <algorithm> 
 
 using namespace std;
 
@@ -13,36 +15,36 @@ typedef vector < T_route > T_routes;
 typedef int T_cost;
 typedef map < T_cost, T_stops > T_stops_of_cost;
 
-struct  T_friend
+struct T_friend
 {
 	int money_;
-	int stop_ind_;
-	bool has_season_ticket_;
-	T_stops_of_cost stops_of_cost_;
+	int stopInd_;
+	bool hasSeasonTicket_;
+	T_stops_of_cost stopsOfCost_;
 	T_friend()
 		:
 		money_{},
-		stop_ind_{},
-		has_season_ticket_{}
+		stopInd_{},
+		hasSeasonTicket_{}
 	{}
 
-	void fill_stops_of_cost(int ticket_price, T_routes const & routes)
+	void fillStopsOfCost(int ticketPrice, T_routes const & routes)
 	{
-		if (has_season_ticket_)
+		if (hasSeasonTicket_)
 		{
-			fill_stops_of_cost_with_season_ticket(routes);
+			fillStopsOfCostWithSeasonTicket(routes);
 		}
 		else
 		{
-			fill_stops_of_cost_with_money(ticket_price,routes);
+			fillStopsOfCostWithMoney(ticketPrice,routes);
 		}
 	}
 
-	void  fill_stops_of_cost_with_season_ticket(T_routes const & routes)
+	void  fillStopsOfCostWithSeasonTicket(T_routes const & routes)
 	{
-		stops_of_cost_[0].insert(stop_ind_);
+		stopsOfCost_[0].insert(stopInd_);
 
-		T_indexes processed_routes_indexes;
+		T_indexes processedRoutesIndexes;
 		bool amended{};
 
 		do
@@ -53,59 +55,59 @@ struct  T_friend
 			{
 				auto const & route_i = routes[i];
 
-				if (processed_routes_indexes.count(i))
+				if (processedRoutesIndexes.count(i))
 				{
 					continue;
 				}
 
-				if (stops_has_stop_from_rout(stops_of_cost_[0],route_i))
+				if (stopsHasStopFromRout(stopsOfCost_[0],route_i))
 				{
 					amended = true;
-
-					stops_of_cost_[0].insert(route_i.begin(),route_i.end());
-					processed_routes_indexes.insert(i);
+					stopsOfCost_[0].insert(route_i.begin(),route_i.end());
+					processedRoutesIndexes.insert(i);
 				}
+				
 			}
 		} while (amended);
 	}
 
-	static bool stops_has_stop_from_rout(T_stops const & stops, T_route const & route)
+	static bool stopsHasStopFromRout(T_stops const & stops, T_route const & route)
 	{
 		for (auto stop :stops)
 		{
 			if (route.count(stop))
 			{
-				return  true;
+				return true;
 			}
 		}
-		return  false;
+		return false;
 	}
 
-	void fill_stops_of_cost_with_money(int ticket_price, T_routes const & routes)
+	void fillStopsOfCostWithMoney(int ticketPrice, T_routes const & routes)
 	{
-		stops_of_cost_[0].insert(stop_ind_);
-		T_indexes   processed_routes_indexes;
+		stopsOfCost_[0].insert(stopInd_);
+		T_indexes   processedRoutesIndexes;
 
-		for (int cost_cur{ ticket_price }; cost_cur <= money_; cost_cur += ticket_price)
+		for (int costCur{ ticketPrice }; costCur <= money_; costCur += ticketPrice)
 		{
 			bool amended{};
-			auto & stops_of_cost_cur = stops_of_cost_[cost_cur];
-			auto & stops_of_cost_prev = stops_of_cost_[cost_cur - ticket_price];
+			auto & stopsOfcostCur = stopsOfCost_[costCur];
+			auto & stopsOfCostPrev = stopsOfCost_[costCur - ticketPrice];
 
 			for (size_t i{}; i < routes.size(); ++i)
 			{
 				auto const & route_i = routes[i];
 
-				if (processed_routes_indexes.count(i))
+				if (processedRoutesIndexes.count(i))
 				{
 					continue;
 				}
 
-				if (stops_has_stop_from_rout(stops_of_cost_prev, route_i))
+				if (stopsHasStopFromRout(stopsOfCostPrev, route_i))
 				{
 					amended = true;
-					stops_of_cost_cur.insert(route_i.begin(), route_i.end());
-					processed_routes_indexes.insert(i);
+					stopsOfcostCur.insert(route_i.begin(), route_i.end());
+					processedRoutesIndexes.insert(i);
 				}
 			}
 
@@ -116,15 +118,15 @@ struct  T_friend
 		}
 	}
 
-	bool successfully_set_stop_cost(int stop_ind, int & stop_cost) const
+	bool successfullySetStopCost(int stopInd, int & stopCost) const
 	{
-		for (auto const & cost_and_stops : stops_of_cost_)
+		for (auto const & costAndStops : stopsOfCost_)
 		{
-			auto cost_cur = cost_and_stops.first;
-			auto const & stops_cur = cost_and_stops.second;
-			if (stops_cur.count(stop_ind))
+			auto costCur = costAndStops.first;
+			auto const & stops_cur = costAndStops.second;
+			if (stops_cur.count(stopInd))
 			{
-				stop_cost = cost_cur;
+				stopCost = costCur;
 				return  true;
 			}
 		}
@@ -133,86 +135,87 @@ struct  T_friend
 	}
 };
 
-typedef vector < T_friend  > T_friends;
+typedef vector <T_friend > T_friends;
 
-bool successfully_set_stop_total_cost(int stop_ind,T_friends const & friends,int & res_stop_total_cost)
+bool successfullySetStopTotalCost(int stopInd,T_friends const & friends,int & resStopTotalCost)
 {
-	for (auto const & friend_cur :friends)
+	for (auto const & friendCur :friends)
 	{
-		int stop_cur_cost{};
-		if (!friend_cur.successfully_set_stop_cost(stop_ind,stop_cur_cost))
+		int stopCurCost{};
+		if (!friendCur.successfullySetStopCost(stopInd,stopCurCost))
 		{
 			return  false;
 		}
-		res_stop_total_cost += stop_cur_cost;
+		resStopTotalCost += stopCurCost;
 	}
 	return  true;
 }
-void calc_result(int stop_ind_min,int n_stop_ind_max, T_friends const & friends)
+void calcResult(int stopIndMin,int nStopIndMax, T_friends const & friends)
 {
-	int stop_ind_res{};
+	int stopIndRes{};
 	const int STOP_TOTAL_COST_MIN_START{ -1 };
-	int stop_total_cost_min{ STOP_TOTAL_COST_MIN_START };
+	int stopTotalCostMin{ STOP_TOTAL_COST_MIN_START };
 
-	for (int stop_ind{ stop_ind_min }; stop_ind <= n_stop_ind_max; ++stop_ind)
+	for (int stopInd{ stopIndMin }; stopInd <= nStopIndMax; ++stopInd)
 	{
-		int stop_total_cost{};
+		int stopTotalCost{};
 
-		if (successfully_set_stop_total_cost(stop_ind, friends, stop_total_cost) && (stop_total_cost_min == STOP_TOTAL_COST_MIN_START || stop_total_cost < stop_total_cost_min))
+		if (successfullySetStopTotalCost(stopInd, friends, stopTotalCost) && (stopTotalCostMin == STOP_TOTAL_COST_MIN_START || stopTotalCost < stopTotalCostMin))
 		{
-			stop_ind_res = stop_ind;
-			stop_total_cost_min = stop_total_cost;
+			stopIndRes = stopInd;
+			stopTotalCostMin = stopTotalCost;
 		}
 	}
-	cout << stop_ind_res;
+	cout << stopIndRes;
 
-	if (stop_ind_res)
+	if (stopIndRes)
 	{
-		cout << ' ' << stop_total_cost_min;
+		cout << ' ' << stopTotalCostMin;
 	}
 	cout << endl;
 }
 
 int main()
 {
-	const int TICKET_PRICE = 4;
-	const int STOP_IND_MIN = 1;
-	int n_stop_ind_max{};
-	int m_routes_total{};
-	int k_friends_total{};
+	const int ticketPrice = 4;
+	const int stopIndMin = 1;
+	int nStopIndMax{}; 
+	int mRoutesTotal{};
+	int kFriendTotal{};
 
-	cin >> n_stop_ind_max;
-	cin >> m_routes_total;
+	cin >> nStopIndMax; 
+	cin >> mRoutesTotal; 
 
-	T_routes routes(m_routes_total);
+	T_routes routes(mRoutesTotal);
 	
 	for (auto & route : routes)
 	{
-		int route_size{};
-		cin >> route_size;
+		int routeSize{};
+		cin >> routeSize; 
 
-		for (int i{}; i < route_size; ++i)
+		for (int i{}; i < routeSize; ++i) 
 		{
-			int stop_ind{};
-			cin >> stop_ind;
-			route.insert(stop_ind);
+			int stopInd{};
+			cin >> stopInd;
+			route.insert(stopInd);
 		}
 	}
 
-	cin >> k_friends_total;
-	T_friends friends(k_friends_total);
+	cin >> kFriendTotal; 
+	T_friends friends(kFriendTotal);
 
-	for (auto & friend_cur : friends)
+	for (auto & friendCur : friends)
 	{
-		cin >> friend_cur.money_;
-		cin >> friend_cur.stop_ind_;
-		cin >> friend_cur.has_season_ticket_;
+		cin >> friendCur.money_; 
+		cin >> friendCur.stopInd_; 
+		cin >> friendCur.hasSeasonTicket_; 
 	}
 
-	for (auto & friend_cur : friends)
+	for (auto & friendCur : friends)
 	{
-		friend_cur.fill_stops_of_cost(TICKET_PRICE,routes);
+		friendCur.fillStopsOfCost(ticketPrice,routes);
 	}
 
-	calc_result(STOP_IND_MIN,n_stop_ind_max,friends);
+	calcResult(stopIndMin,nStopIndMax,friends);
+	
 }
