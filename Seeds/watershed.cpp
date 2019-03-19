@@ -100,14 +100,14 @@ void watershed(QString path,int color, int color_2, int& amount, std::vector<dou
 
                     }
                 }
-            quantity = 0;
+            amount = 0;
             for (unsigned int i = 0; i < contours.size(); i = i + 2){
                 cv::RotatedRect rect = cv::minAreaRect(contours[i]);
-                cv::putText(source_img, to_string(quantity+1), rect.center, cv::FONT_ITALIC, 2, cv::Scalar(0,0,255), 1);
+                cv::putText(source_img, to_string(amount+1), rect.center, cv::FONT_ITALIC, 2, cv::Scalar(0,0,255), 1);
                 length.push_back(rect.size.height*PIXEL_SIZE);
                 width.push_back(rect.size.width*PIXEL_SIZE);
                 area.push_back(cv::contourArea(contours[i])*PIXEL_SIZE*PIXEL_SIZE);
-                quantity++;
+                amount++;
             }
 
             cv::imwrite("result.png", source_img);
