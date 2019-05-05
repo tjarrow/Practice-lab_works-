@@ -4,9 +4,8 @@
 #include <iostream>
 
 using namespace cv;
-using namespace std;
 
-const double PIXEL_SIZE = 0.102;
+const double PIXEL_SIZE = 0.231;
 
 Mat imageRead(std::string path) {
 	Mat img = imread(path.c_str());
@@ -23,14 +22,11 @@ Mat laplacian(Mat &sharp) {
 	return imgLaplacian;
 }
 
-
 Mat erode(Mat &subPlans, Mat &imgLaplacian) {
 	subPlans.convertTo(subPlans, CV_8UC3);
 	imgLaplacian.convertTo(imgLaplacian, CV_8UC3);
 
-
 	blur(subPlans, subPlans, Size(3, 3));
-
 
 	int erodeSz = 4;
 	Mat structuringElement = cv::getStructuringElement(MORPH_ELLIPSE,
@@ -101,14 +97,10 @@ int mainAlg(Mat resultImage, std::vector<double> &length,
 	vector<Mat> channels;
 	split(hsv, channels);
 
-
 	Mat sharp = channels[1];
-	  imwrite("result1.png", sharp);
 	Mat imgLaplacian = laplacian(sharp);
 	imgLaplacian = laplacian(imgLaplacian);
-	  imwrite("result2.png", imgLaplacian);
-
-
+	
 	channels[1].convertTo(sharp, CV_32F);
 
 	Mat subPlans = sharp - imgLaplacian;
@@ -139,7 +131,6 @@ int mainAlg(Mat resultImage, std::vector<double> &length,
 			int index = markers.at<int>(i, j);
 			if (index == -1)
 				resultImage.at<Vec3b>(i, j) = Vec3b(0, 255, 0);
-
 		}
 	}
 
@@ -153,31 +144,10 @@ int mainAlg(Mat resultImage, std::vector<double> &length,
 		area.push_back(contourArea(contours[i]) * PIXEL_SIZE * PIXEL_SIZE);
 		count++;
 	}
-
-	  imwrite("result.png", resultImage);
-
+	
 	return count;
 }
 
-std::vector<std::string> getFileList(std::string path) {
 
-	int idx = 0;
-	
-	std::vector<std::string> files;
-	/*if ((dir = opendir(path.c_str())) != NULL) {
-		while ((ent = readdir(dir)) != NULL) {
-			if (ent->d_name != std::string("..") and ent->d_name != std::string(".")) {
-				files.push_back(ent->d_name);
-			}
-		}
-		closedir(dir);
-	}*/
-
-	//ofstream fout("amount.txt");
-
-	
-
-	return files;
-}
 
 

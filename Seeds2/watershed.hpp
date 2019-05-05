@@ -18,7 +18,3 @@ vector<vector<Point> > drawContours(Mat markers, Mat sureFigure);
 
 int mainAlg(Mat resultImage, std::vector<double> &length,
 	std::vector<double> &width, std::vector<double> &area);
-
-
-std::vector<std::string> getFileList(std::string path);
-
